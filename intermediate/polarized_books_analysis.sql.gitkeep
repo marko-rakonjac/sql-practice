@@ -1,0 +1,21 @@
+-- Polarized Books Analysis (LeetCode SQL Challenge)
+-- -------------------------------------------------
+-- Description: Identify books with polarized reader opinions.
+-- A book qualifies if it has ≥5 sessions, at least one rating ≤2 and ≥4,
+-- and a polarization score (extreme ratings ÷ total) ≥0.6.
+--
+-- Concepts Demonstrated: JOIN, GROUP BY, HAVING, conditional aggregation, derived metrics
+
+
+SELECT b.*,
+       MAX(r.session_rating) - MIN(r.session_rating) AS rating_spread,
+       ROUND(AVG(r.session_rating <= 2 OR r.session_rating >= 4), 2) AS polarization_score
+  FROM books b
+  JOIN reading_sessions r
+    ON b.book_id = r.book_id
+ GROUP BY b.book_id
+HAVING COUNT(r.session_id) > 4
+       AND MIN(r.session_rating) <= 2
+       AND MAX(r.session_rating) >= 4
+       AND polarization_score >= 0.6
+ ORDER BY polarization_score DESC, b.title DESC;
